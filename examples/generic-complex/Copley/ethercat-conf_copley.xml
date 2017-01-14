@@ -1,0 +1,51 @@
+<masters>
+<master idx="0" appTimePeriod="1000000" refClockSyncCycles="1000">
+  <!-- 
+       Copley AEM-090-14 CANopen slave 
+       Identity:
+       Vendor Id:       0x000000ab
+       Product code:    0x00001030
+   -->
+  <slave idx="0" type="generic" vid="000000ab" pid="0x00001030" configPdos="true">
+    <syncManager idx="0" dir="out">
+    </syncManager>
+    <syncManager idx="1" dir="in">
+    </syncManager>
+   <!--
+    SM2: PhysAddr 0x1200, DefaultSize  256, ControlRegister 0x64, Enable 1
+    RxPDO 0x1600 ""
+    PDO entry 0x6040:00, 16 bit, ""
+    PDO entry 0x60ff:00, 32 bit, ""
+    PDO entry 0x2183:00, 32 bit, ""
+    -->
+    <syncManager idx="2" dir="out">
+      <pdo idx="1600">
+        <pdoEntry idx="6040" subIdx="00" bitLen="16"  halType="complex">
+           <complexEntry bitLen="8" halPin="ctrl_1Part" halType="u32"/>
+           <complexEntry bitLen="8" halPin="ctrl_2Part" halType="u32"/>
+        </pdoEntry> 
+        <pdoEntry idx="60ff" subIdx="00" bitLen="32" halPin="targetVelOut" halType="s32"/>
+        <pdoEntry idx="2183" subIdx="00" bitLen="32"  halPin="LatchOut" halType="u32"/> 
+      </pdo>
+    </syncManager>
+
+   <!-- SM3: PhysAddr 0x1800, DefaultSize  256, ControlRegister 0x20, Enable 1
+    TxPDO 0x1a00 ""
+    PDO entry 0x6041:00, 16 bit, ""
+    PDO entry 0x606c:00, 32 bit, ""
+    PDO entry 0x2183:00, 32 bit, ""
+    PDO entry 0x60ff:00, 32 bit, ""
+    PDO entry 0x2182:00, 32 bit, ""
+    -->
+    <syncManager idx="3" dir="in">
+      <pdo idx="1a00">
+        <pdoEntry idx="6041" subIdx="00" bitLen="16" halPin="Status" halType="u32"/>
+        <pdoEntry idx="606c" subIdx="00" bitLen="32" halPin="actualVel" halType="s32"/>
+        <pdoEntry idx="2183" subIdx="00" bitLen="32" halPin="LatchIn" halType="u32"/>
+        <pdoEntry idx="60ff" subIdx="00" bitLen="32" halPin="targetVelIn" halType="s32"/>
+        <pdoEntry idx="2182" subIdx="00" bitLen="32" halPin="FaultMask" halType="u32"/>
+      </pdo>
+    </syncManager>
+  </slave>
+</master>
+</masters>

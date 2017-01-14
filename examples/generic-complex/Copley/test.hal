@@ -1,0 +1,7 @@
+loadusr -W lcec_conf ethercat-conf_copley.xml
+unload lcec_conf
+loadrt lcec
+newthread test 1000000
+addf lcec.read-all test
+addf lcec.write-all test
+#start
