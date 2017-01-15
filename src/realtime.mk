@@ -21,11 +21,17 @@ else
 
 module = $(patsubst %.o,%.so,$(obj-m))
 
-EXTRA_CFLAGS := $(filter-out -Wframe-larger-than=%,$(EXTRA_CFLAGS))
+EXTRA_CFLAGS +=  -fPIC -g -funwind-tables
 
 $(module): $(lcec-objs)
-	$(CC) -shared -o $@ $(lcec-objs) -Wl,-rpath,$(LIBDIR) -L$(LIBDIR) -llinuxcnchal -lethercat -lrt
-
+	@echo Linking $@
+	ld -d -r -o $*.tmp $^
+	objcopy -j .rtapi_export -O binary $*.tmp $*.exported
+	(echo '{ global : '; tr -s '\0' <$*.exported | xargs -r0 printf '%s;\n' | grep .; echo 'local : * ; };') > $*.ver
+	$(CC) -shared -Bsymbolic -Wl,-rpath,$(LIBDIR) -L$(LIBDIR)  -Wl,--version-script,$*.ver -o $@ $^ -llinuxcnchal -lethercat_rtdm -lrt
+    #-Wl,--no-as-needed
+	ld -d -r -o $*.tmp $^
+	@echo Linking $@ end
 %.o: %.c
 	$(CC) -o $@ $(EXTRA_CFLAGS) -Os -c $<
 
