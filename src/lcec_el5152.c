@@ -146,7 +146,7 @@ void lcec_el5152_write(struct lcec_slave *slave, long period);
 
 int lcec_el5152_init(int comp_id, struct lcec_slave *slave, ec_pdo_entry_reg_t *pdo_entry_regs) {
   lcec_master_t *master = slave->master;
-  lcec_el5152_data_t *hal_data;
+  lcec_el5152_data_t *lcec_hal_data;
   int i;
   lcec_el5152_chan_t *chan;
   int err;
@@ -156,22 +156,22 @@ int lcec_el5152_init(int comp_id, struct lcec_slave *slave, ec_pdo_entry_reg_t *
   slave->proc_write = lcec_el5152_write;
 
   // alloc hal memory
-  if ((hal_data = hal_malloc(sizeof(lcec_el5152_data_t))) == NULL) {
+  if ((lcec_hal_data = hal_malloc(sizeof(lcec_el5152_data_t))) == NULL) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "hal_malloc() for slave %s.%s failed\n", master->name, slave->name);
     return -EIO;
   }
-  memset(hal_data, 0, sizeof(lcec_el5152_data_t));
-  slave->hal_data = hal_data;
+  memset(lcec_hal_data, 0, sizeof(lcec_el5152_data_t));
+  slave->lcec_hal_data = lcec_hal_data;
 
   // initializer sync info
   slave->sync_info = lcec_el5152_syncs;
 
   // initialize global data
-  hal_data->last_operational = 0;
+  lcec_hal_data->last_operational = 0;
 
   // initialize pins
   for (i=0; i<LCEC_EL5152_CHANS; i++) {
-    chan = &hal_data->chans[i];
+    chan = &lcec_hal_data->chans[i];
 
     // initialize POD entries
     LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x6000 + (i << 4), 0x03, &chan->set_count_done_pdo_os, &chan->set_count_done_pdo_bp);
@@ -276,7 +276,7 @@ int lcec_el5152_init(int comp_id, struct lcec_slave *slave, ec_pdo_entry_reg_t *
 
 void lcec_el5152_read(struct lcec_slave *slave, long period) {
   lcec_master_t *master = slave->master;
-  lcec_el5152_data_t *hal_data = (lcec_el5152_data_t *) slave->hal_data;
+  lcec_el5152_data_t *lcec_hal_data = (lcec_el5152_data_t *) slave->lcec_hal_data;
   uint8_t *pd = master->process_data;
   int i, idx_flag;
   lcec_el5152_chan_t *chan;
@@ -285,13 +285,13 @@ void lcec_el5152_read(struct lcec_slave *slave, long period) {
 
   // wait for slave to be operational
   if (!slave->state.operational) {
-    hal_data->last_operational = 0;
+    lcec_hal_data->last_operational = 0;
     return;
   }
 
   // check inputs
   for (i=0; i<LCEC_EL5152_CHANS; i++) {
-    chan = &hal_data->chans[i];
+    chan = &lcec_hal_data->chans[i];
 
     // check for change in scale value
     if (*(chan->pos_scale) != chan->old_scale) {
@@ -317,7 +317,7 @@ void lcec_el5152_read(struct lcec_slave *slave, long period) {
     raw_period = EC_READ_U32(&pd[chan->period_pdo_os]);
 
     // check for operational change of slave
-    if (!hal_data->last_operational) {
+    if (!lcec_hal_data->last_operational) {
       chan->last_count = raw_count;
     }
 
@@ -369,19 +369,19 @@ void lcec_el5152_read(struct lcec_slave *slave, long period) {
     *(chan->period) = ((double) (*(chan->raw_period))) * LCEC_EL5152_PERIOD_SCALE;
   }
 
-  hal_data->last_operational = 1;
+  lcec_hal_data->last_operational = 1;
 }
 
 void lcec_el5152_write(struct lcec_slave *slave, long period) {
   lcec_master_t *master = slave->master;
-  lcec_el5152_data_t *hal_data = (lcec_el5152_data_t *) slave->hal_data;
+  lcec_el5152_data_t *lcec_hal_data = (lcec_el5152_data_t *) slave->lcec_hal_data;
   uint8_t *pd = master->process_data;
   int i;
   lcec_el5152_chan_t *chan;
 
   // set outputs
   for (i=0; i<LCEC_EL5152_CHANS; i++) {
-    chan = &hal_data->chans[i];
+    chan = &lcec_hal_data->chans[i];
 
     // set output data
     EC_WRITE_BIT(&pd[chan->set_count_pdo_os], chan->set_count_pdo_bp, *(chan->set_raw_count));

@@ -104,7 +104,7 @@ typedef struct lcec_master {
   int process_data_len;
   struct lcec_slave *first_slave;
   struct lcec_slave *last_slave;
-  lcec_master_data_t *hal_data;
+  lcec_master_data_t *lcec_hal_data;
   uint64_t app_time;
   uint32_t app_time_period;
   int sync_ref_cnt;
@@ -150,7 +150,7 @@ typedef struct lcec_slave {
   lcec_slave_rw_t proc_read;
   lcec_slave_rw_t proc_write;
   lcec_slave_state_t *hal_state_data;
-  void *hal_data;
+  void *lcec_hal_data;
   ec_pdo_entry_info_t *generic_pdo_entries;
   ec_pdo_info_t *generic_pdos;
   ec_sync_info_t *generic_sync_managers;

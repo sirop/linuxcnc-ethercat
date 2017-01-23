@@ -252,7 +252,7 @@ int lcec_el7041_1000_init(int comp_id, struct lcec_slave *s, ec_pdo_entry_reg_t 
     return -EIO;
   }
   memset(hd, 0, sizeof(lcec_el7041_1000_data_t));
-  s->hal_data = hd;
+  s->lcec_hal_data = hd;
 
   // initialize sync info
   s->sync_info = lcec_el7041_1000_syncs;
@@ -446,7 +446,7 @@ int lcec_el7041_1000_init(int comp_id, struct lcec_slave *s, ec_pdo_entry_reg_t 
 
 void lcec_el7041_1000_read(struct lcec_slave *s, long period) {
   lcec_master_t *m = s->master;
-  lcec_el7041_1000_data_t *hd = (lcec_el7041_1000_data_t *) s->hal_data;
+  lcec_el7041_1000_data_t *hd = (lcec_el7041_1000_data_t *) s->lcec_hal_data;
   uint8_t *pd = m->process_data;
   int16_t raw_count, raw_latch, raw_delta;
 
@@ -568,7 +568,7 @@ void lcec_el7041_1000_read(struct lcec_slave *s, long period) {
 
 void lcec_el7041_1000_write(struct lcec_slave *s, long period) {
   lcec_master_t *m = s->master;
-  lcec_el7041_1000_data_t *hd = (lcec_el7041_1000_data_t *) s->hal_data;
+  lcec_el7041_1000_data_t *hd = (lcec_el7041_1000_data_t *) s->lcec_hal_data;
   uint8_t *pd = m->process_data;
   double tmpval, tmpdc, raw_val;
   int enable_on_edge;

@@ -30,7 +30,7 @@ void lcec_el1xxx_read(struct lcec_slave *slave, long period);
 
 int lcec_el1xxx_init(int comp_id, struct lcec_slave *slave, ec_pdo_entry_reg_t *pdo_entry_regs) {
   lcec_master_t *master = slave->master;
-  lcec_el1xxx_pin_t *hal_data;
+  lcec_el1xxx_pin_t *lcec_hal_data;
   lcec_el1xxx_pin_t *pin;
   int i;
   int err;
@@ -39,15 +39,15 @@ int lcec_el1xxx_init(int comp_id, struct lcec_slave *slave, ec_pdo_entry_reg_t *
   slave->proc_read = lcec_el1xxx_read;
 
   // alloc hal memory
-  if ((hal_data = hal_malloc(sizeof(lcec_el1xxx_pin_t) * slave->pdo_entry_count)) == NULL) {
+  if ((lcec_hal_data = hal_malloc(sizeof(lcec_el1xxx_pin_t) * slave->pdo_entry_count)) == NULL) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "hal_malloc() for slave %s.%s failed\n", master->name, slave->name);
     return -EIO;
   }
-  memset(hal_data, 0, sizeof(lcec_el1xxx_pin_t) * slave->pdo_entry_count);
-  slave->hal_data = hal_data;
+  memset(lcec_hal_data, 0, sizeof(lcec_el1xxx_pin_t) * slave->pdo_entry_count);
+  slave->lcec_hal_data = lcec_hal_data;
 
   // initialize pins
-  for (i=0, pin=hal_data; i<slave->pdo_entry_count; i++, pin++) {
+  for (i=0, pin=lcec_hal_data; i<slave->pdo_entry_count; i++, pin++) {
     // initialize POD entry
     LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x6000 + (i << 4), 0x01, &pin->pdo_os, &pin->pdo_bp);
 
@@ -71,7 +71,7 @@ int lcec_el1xxx_init(int comp_id, struct lcec_slave *slave, ec_pdo_entry_reg_t *
 
 void lcec_el1xxx_read(struct lcec_slave *slave, long period) {
   lcec_master_t *master = slave->master;
-  lcec_el1xxx_pin_t *hal_data = (lcec_el1xxx_pin_t *) slave->hal_data;
+  lcec_el1xxx_pin_t *lcec_hal_data = (lcec_el1xxx_pin_t *) slave->lcec_hal_data;
   uint8_t *pd = master->process_data;
   lcec_el1xxx_pin_t *pin;
   int i, s;
@@ -82,7 +82,7 @@ void lcec_el1xxx_read(struct lcec_slave *slave, long period) {
   }
 
   // check inputs
-  for (i=0, pin=hal_data; i<slave->pdo_entry_count; i++, pin++) {
+  for (i=0, pin=lcec_hal_data; i<slave->pdo_entry_count; i++, pin++) {
     s = EC_READ_BIT(&pd[pin->pdo_os], pin->pdo_bp);
     *(pin->in) = s;
     *(pin->in_not) = !s;

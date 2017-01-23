@@ -174,8 +174,8 @@ void lcec_release_lock(void *data);
 
 lcec_master_data_t *lcec_init_master_hal(const char *pfx);
 lcec_slave_state_t *lcec_init_slave_state_hal(char *master_name, char *slave_name);
-void lcec_update_master_hal(lcec_master_data_t *hal_data, ec_master_state_t *ms);
-void lcec_update_slave_state_hal(lcec_slave_state_t *hal_data, ec_slave_config_state_t *ss);
+void lcec_update_master_hal(lcec_master_data_t *lcec_hal_data, ec_master_state_t *ms);
+void lcec_update_slave_state_hal(lcec_slave_state_t *lcec_hal_data, ec_slave_config_state_t *ss);
 
 void lcec_read_all(void *arg, long period);
 void lcec_write_all(void *arg, long period);
@@ -313,7 +313,7 @@ int rtapi_app_main(void) {
 
     // init hal data
     rtapi_snprintf(name, HAL_NAME_LEN, "%s.%s", LCEC_MODULE_NAME, master->name);
-    if ((master->hal_data = lcec_init_master_hal(name)) == NULL) {
+    if ((master->lcec_hal_data = lcec_init_master_hal(name)) == NULL) {
       goto fail2;
     }
 
@@ -573,7 +573,7 @@ int lcec_parse_config(void) {
           }
         }
 
-        slave->hal_data = generic_hal_data;
+        slave->lcec_hal_data = generic_hal_data;
         slave->generic_pdo_entries = generic_pdo_entries;
         slave->generic_pdos = generic_pdos;
         slave->generic_sync_managers = generic_sync_managers;
@@ -921,121 +921,121 @@ void lcec_release_lock(void *data) {
 }
 
 lcec_master_data_t *lcec_init_master_hal(const char *pfx) {
-  lcec_master_data_t *hal_data;
+  lcec_master_data_t *lcec_hal_data;
 
   // alloc hal data
-  if ((hal_data = hal_malloc(sizeof(lcec_master_data_t))) == NULL) {
+  if ((lcec_hal_data = hal_malloc(sizeof(lcec_master_data_t))) == NULL) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "hal_malloc() for %s failed\n", pfx);
     return NULL;
   }
-  memset(hal_data, 0, sizeof(lcec_master_data_t));
+  memset(lcec_hal_data, 0, sizeof(lcec_master_data_t));
 
   // export pins
-  if (hal_pin_u32_newf(HAL_OUT, &(hal_data->slaves_responding), comp_id, "%s.slaves-responding", pfx) != 0) {
+  if (hal_pin_u32_newf(HAL_OUT, &(lcec_hal_data->slaves_responding), comp_id, "%s.slaves-responding", pfx) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.slaves-responding failed\n", pfx);
     return NULL;
   }
-  if (hal_pin_bit_newf(HAL_OUT, &(hal_data->state_init), comp_id, "%s.state-init", pfx) != 0) {
+  if (hal_pin_bit_newf(HAL_OUT, &(lcec_hal_data->state_init), comp_id, "%s.state-init", pfx) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.state-init failed\n", pfx);
     return NULL;
   }
-  if (hal_pin_bit_newf(HAL_OUT, &(hal_data->state_preop), comp_id, "%s.state-preop", pfx) != 0) {
+  if (hal_pin_bit_newf(HAL_OUT, &(lcec_hal_data->state_preop), comp_id, "%s.state-preop", pfx) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.state-preop failed\n", pfx);
     return NULL;
   }
-  if (hal_pin_bit_newf(HAL_OUT, &(hal_data->state_safeop), comp_id, "%s.state-safeop", pfx) != 0) {
+  if (hal_pin_bit_newf(HAL_OUT, &(lcec_hal_data->state_safeop), comp_id, "%s.state-safeop", pfx) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.state-safeop failed\n", pfx);
     return NULL;
   }
-  if (hal_pin_bit_newf(HAL_OUT, &(hal_data->state_op), comp_id, "%s.state-op", pfx) != 0) {
+  if (hal_pin_bit_newf(HAL_OUT, &(lcec_hal_data->state_op), comp_id, "%s.state-op", pfx) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.state-op failed\n", pfx);
     return NULL;
   }
-  if (hal_pin_bit_newf(HAL_OUT, &(hal_data->link_up), comp_id, "%s.link-up", pfx) != 0) {
+  if (hal_pin_bit_newf(HAL_OUT, &(lcec_hal_data->link_up), comp_id, "%s.link-up", pfx) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.link-up failed\n", pfx);
     return NULL;
   }
-  if (hal_pin_bit_newf(HAL_OUT, &(hal_data->all_op), comp_id, "%s.all-op", pfx) != 0) {
+  if (hal_pin_bit_newf(HAL_OUT, &(lcec_hal_data->all_op), comp_id, "%s.all-op", pfx) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.all-op failed\n", pfx);
     return NULL;
   }
 
   // initialize pins
-  *(hal_data->slaves_responding) = 0;
-  *(hal_data->state_init) = 0;
-  *(hal_data->state_preop) = 0;
-  *(hal_data->state_safeop) = 0;
-  *(hal_data->state_op) = 0;
-  *(hal_data->link_up) = 0;
-  *(hal_data->all_op) = 0;
+  *(lcec_hal_data->slaves_responding) = 0;
+  *(lcec_hal_data->state_init) = 0;
+  *(lcec_hal_data->state_preop) = 0;
+  *(lcec_hal_data->state_safeop) = 0;
+  *(lcec_hal_data->state_op) = 0;
+  *(lcec_hal_data->link_up) = 0;
+  *(lcec_hal_data->all_op) = 0;
 
-  return hal_data;
+  return lcec_hal_data;
 }
 
 lcec_slave_state_t *lcec_init_slave_state_hal(char *master_name, char *slave_name) {
-  lcec_slave_state_t *hal_data;
+  lcec_slave_state_t *lcec_hal_data;
 
   // alloc hal data
-  if ((hal_data = hal_malloc(sizeof(lcec_slave_state_t))) == NULL) {
+  if ((lcec_hal_data = hal_malloc(sizeof(lcec_slave_state_t))) == NULL) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "hal_malloc() for %s.%s.%s failed\n", LCEC_MODULE_NAME, master_name, slave_name);
     return NULL;
   }
-  memset(hal_data, 0, sizeof(lcec_master_data_t));
+  memset(lcec_hal_data, 0, sizeof(lcec_master_data_t));
 
   // export pins
-  if (hal_pin_bit_newf(HAL_OUT, &(hal_data->online), comp_id, "%s.%s.%s.slave-online", LCEC_MODULE_NAME, master_name, slave_name) != 0) {
+  if (hal_pin_bit_newf(HAL_OUT, &(lcec_hal_data->online), comp_id, "%s.%s.%s.slave-online", LCEC_MODULE_NAME, master_name, slave_name) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.slaves-online failed\n", LCEC_MODULE_NAME, master_name, slave_name);
     return NULL;
   }
-  if (hal_pin_bit_newf(HAL_OUT, &(hal_data->operational), comp_id, "%s.%s.%s.slave-oper", LCEC_MODULE_NAME, master_name, slave_name) != 0) {
+  if (hal_pin_bit_newf(HAL_OUT, &(lcec_hal_data->operational), comp_id, "%s.%s.%s.slave-oper", LCEC_MODULE_NAME, master_name, slave_name) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.slaves-oper failed\n", LCEC_MODULE_NAME, master_name, slave_name);
     return NULL;
   }
-  if (hal_pin_bit_newf(HAL_OUT, &(hal_data->state_init), comp_id, "%s.%s.%s.slave-state-init", LCEC_MODULE_NAME, master_name, slave_name) != 0) {
+  if (hal_pin_bit_newf(HAL_OUT, &(lcec_hal_data->state_init), comp_id, "%s.%s.%s.slave-state-init", LCEC_MODULE_NAME, master_name, slave_name) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.state-state-init failed\n", LCEC_MODULE_NAME, master_name, slave_name);
     return NULL;
   }
-  if (hal_pin_bit_newf(HAL_OUT, &(hal_data->state_preop), comp_id, "%s.%s.%s.slave-state-preop", LCEC_MODULE_NAME, master_name, slave_name) != 0) {
+  if (hal_pin_bit_newf(HAL_OUT, &(lcec_hal_data->state_preop), comp_id, "%s.%s.%s.slave-state-preop", LCEC_MODULE_NAME, master_name, slave_name) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.state-state-preop failed\n", LCEC_MODULE_NAME, master_name, slave_name);
     return NULL;
   }
-  if (hal_pin_bit_newf(HAL_OUT, &(hal_data->state_safeop), comp_id, "%s.%s.%s.slave-state-safeop", LCEC_MODULE_NAME, master_name, slave_name) != 0) {
+  if (hal_pin_bit_newf(HAL_OUT, &(lcec_hal_data->state_safeop), comp_id, "%s.%s.%s.slave-state-safeop", LCEC_MODULE_NAME, master_name, slave_name) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.state-state-safeop failed\n", LCEC_MODULE_NAME, master_name, slave_name);
     return NULL;
   }
-  if (hal_pin_bit_newf(HAL_OUT, &(hal_data->state_op), comp_id, "%s.%s.%s.slave-state-op", LCEC_MODULE_NAME, master_name, slave_name) != 0) {
+  if (hal_pin_bit_newf(HAL_OUT, &(lcec_hal_data->state_op), comp_id, "%s.%s.%s.slave-state-op", LCEC_MODULE_NAME, master_name, slave_name) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.state-state-op failed\n", LCEC_MODULE_NAME, master_name, slave_name);
     return NULL;
   }
 
   // initialize pins
-  *(hal_data->online) = 0;
-  *(hal_data->operational) = 0;
-  *(hal_data->state_init) = 0;
-  *(hal_data->state_preop) = 0;
-  *(hal_data->state_safeop) = 0;
-  *(hal_data->state_op) = 0;
+  *(lcec_hal_data->online) = 0;
+  *(lcec_hal_data->operational) = 0;
+  *(lcec_hal_data->state_init) = 0;
+  *(lcec_hal_data->state_preop) = 0;
+  *(lcec_hal_data->state_safeop) = 0;
+  *(lcec_hal_data->state_op) = 0;
 
-  return hal_data;
+  return lcec_hal_data;
 }
 
-void lcec_update_master_hal(lcec_master_data_t *hal_data, ec_master_state_t *ms) {
-  *(hal_data->slaves_responding) = ms->slaves_responding;
-  *(hal_data->state_init) = (ms->al_states & 0x01) != 0;
-  *(hal_data->state_preop) = (ms->al_states & 0x02) != 0;
-  *(hal_data->state_safeop) = (ms->al_states & 0x04) != 0;
-  *(hal_data->state_op) = (ms->al_states & 0x08) != 0;
-  *(hal_data->link_up) = ms->link_up;
-  *(hal_data->all_op) = (ms->al_states == 0x08);
+void lcec_update_master_hal(lcec_master_data_t *lcec_hal_data, ec_master_state_t *ms) {
+  *(lcec_hal_data->slaves_responding) = ms->slaves_responding;
+  *(lcec_hal_data->state_init) = (ms->al_states & 0x01) != 0;
+  *(lcec_hal_data->state_preop) = (ms->al_states & 0x02) != 0;
+  *(lcec_hal_data->state_safeop) = (ms->al_states & 0x04) != 0;
+  *(lcec_hal_data->state_op) = (ms->al_states & 0x08) != 0;
+  *(lcec_hal_data->link_up) = ms->link_up;
+  *(lcec_hal_data->all_op) = (ms->al_states == 0x08);
 }
 
-void lcec_update_slave_state_hal(lcec_slave_state_t *hal_data, ec_slave_config_state_t *ss) {
-  *(hal_data->online) = ss->online;
-  *(hal_data->operational) = ss->operational;
-  *(hal_data->state_init) = (ss->al_state & 0x01) != 0;
-  *(hal_data->state_preop) = (ss->al_state & 0x02) != 0;
-  *(hal_data->state_safeop) = (ss->al_state & 0x04) != 0;
-  *(hal_data->state_op) = (ss->al_state & 0x08) != 0;
+void lcec_update_slave_state_hal(lcec_slave_state_t *lcec_hal_data, ec_slave_config_state_t *ss) {
+  *(lcec_hal_data->online) = ss->online;
+  *(lcec_hal_data->operational) = ss->operational;
+  *(lcec_hal_data->state_init) = (ss->al_state & 0x01) != 0;
+  *(lcec_hal_data->state_preop) = (ss->al_state & 0x02) != 0;
+  *(lcec_hal_data->state_safeop) = (ss->al_state & 0x04) != 0;
+  *(lcec_hal_data->state_op) = (ss->al_state & 0x08) != 0;
 }
 
 void lcec_read_all(void *arg, long period) {
@@ -1077,7 +1077,7 @@ void lcec_read_master(void *arg, long period) {
   rtapi_mutex_give(&master->mutex);
 
   // update state pins
-  lcec_update_master_hal(master->hal_data, &ms);
+  lcec_update_master_hal(master->lcec_hal_data, &ms);
 
   // update global state
   global_ms.slaves_responding += ms.slaves_responding;

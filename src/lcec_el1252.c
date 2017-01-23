@@ -117,7 +117,7 @@ void lcec_el1252_read(struct lcec_slave *slave, long period);
 
 int lcec_el1252_init(int comp_id, struct lcec_slave *slave, ec_pdo_entry_reg_t *pdo_entry_regs) {
   lcec_master_t *master = slave->master;
-  lcec_el1252_data_t *hal_data;
+  lcec_el1252_data_t *lcec_hal_data;
 
   int err;
 
@@ -125,43 +125,43 @@ int lcec_el1252_init(int comp_id, struct lcec_slave *slave, ec_pdo_entry_reg_t *
   slave->proc_read = lcec_el1252_read;
 
   // alloc hal memory
-  if ((hal_data = hal_malloc(sizeof(lcec_el1252_data_t))) == NULL) {
+  if ((lcec_hal_data = hal_malloc(sizeof(lcec_el1252_data_t))) == NULL) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "hal_malloc() for slave %s.%s failed\n", master->name, slave->name);
     return -EIO;
   }
-  memset(hal_data, 0, sizeof(lcec_el1252_data_t));
-  slave->hal_data = hal_data;
+  memset(lcec_hal_data, 0, sizeof(lcec_el1252_data_t));
+  slave->lcec_hal_data = lcec_hal_data;
 
   // initializer sync info
   slave->sync_info = lcec_el1252_syncs;
 
   // initialize PDO entries     position      vend.id     prod.code   index   sindx                     offset                       bit pos
-  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x6000, 0x01, &hal_data->chans[0].in_offs, &hal_data->chans[0].in_bitp);
-  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x6000, 0x02, &hal_data->chans[1].in_offs, &hal_data->chans[1].in_bitp);
+  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x6000, 0x01, &lcec_hal_data->chans[0].in_offs, &lcec_hal_data->chans[0].in_bitp);
+  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x6000, 0x02, &lcec_hal_data->chans[1].in_offs, &lcec_hal_data->chans[1].in_bitp);
 
-  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x1d09, 0xae, &hal_data->chans[0].Status_offs,   NULL);
-  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x1d09, 0xaf, &hal_data->chans[1].Status_offs,   NULL);
+  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x1d09, 0xae, &lcec_hal_data->chans[0].Status_offs,   NULL);
+  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x1d09, 0xaf, &lcec_hal_data->chans[1].Status_offs,   NULL);
 
-  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x1d09, 0xb0, &hal_data->chans[0].LatchPos_offs, NULL);
-  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x1d09, 0xc0, &hal_data->chans[1].LatchPos_offs, NULL);
+  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x1d09, 0xb0, &lcec_hal_data->chans[0].LatchPos_offs, NULL);
+  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x1d09, 0xc0, &lcec_hal_data->chans[1].LatchPos_offs, NULL);
 
-  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x1d09, 0xb8, &hal_data->chans[0].LatchNeg_offs, NULL);
-  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x1d09, 0xc8, &hal_data->chans[1].LatchNeg_offs, NULL);
+  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x1d09, 0xb8, &lcec_hal_data->chans[0].LatchNeg_offs, NULL);
+  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x1d09, 0xc8, &lcec_hal_data->chans[1].LatchNeg_offs, NULL);
 
   // export in1 pin
-  if ((err = hal_pin_bit_newf(HAL_OUT, &(hal_data->chans[0].in), comp_id, "%s.%s.%s.din-%d", LCEC_MODULE_NAME, master->name, slave->name, 0)) != 0) {
+  if ((err = hal_pin_bit_newf(HAL_OUT, &(lcec_hal_data->chans[0].in), comp_id, "%s.%s.%s.din-%d", LCEC_MODULE_NAME, master->name, slave->name, 0)) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.din-%02d failed\n", LCEC_MODULE_NAME, master->name, slave->name, 0);
     return err;
   }
   // export in2 pin
-  if ((err = hal_pin_bit_newf(HAL_OUT, &(hal_data->chans[1].in), comp_id, "%s.%s.%s.din-%d", LCEC_MODULE_NAME, master->name, slave->name, 1)) != 0) {
+  if ((err = hal_pin_bit_newf(HAL_OUT, &(lcec_hal_data->chans[1].in), comp_id, "%s.%s.%s.din-%d", LCEC_MODULE_NAME, master->name, slave->name, 1)) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.din-%02d failed\n", LCEC_MODULE_NAME, master->name, slave->name, 0);
     return err;
   }
 
   // initialize value of input pins
-  *(hal_data->chans[0].in) = 0;
-  *(hal_data->chans[1].in) = 0;
+  *(lcec_hal_data->chans[0].in) = 0;
+  *(lcec_hal_data->chans[1].in) = 0;
 
   return 0;
 }
@@ -170,19 +170,19 @@ void lcec_el1252_read(struct lcec_slave *slave, long period) {
   lcec_master_t *master = slave->master;
   uint8_t *pd = master->process_data;
 
-  lcec_el1252_data_t *hal_data = (lcec_el1252_data_t *) slave->hal_data;
+  lcec_el1252_data_t *lcec_hal_data = (lcec_el1252_data_t *) slave->lcec_hal_data;
 
   // read inputs
-  *(hal_data->chans[0].in) = EC_READ_BIT(&pd[hal_data->chans[0].in_offs], hal_data->chans[0].in_bitp);
-  *(hal_data->chans[1].in) = EC_READ_BIT(&pd[hal_data->chans[1].in_offs], hal_data->chans[1].in_bitp);
+  *(lcec_hal_data->chans[0].in) = EC_READ_BIT(&pd[lcec_hal_data->chans[0].in_offs], lcec_hal_data->chans[0].in_bitp);
+  *(lcec_hal_data->chans[1].in) = EC_READ_BIT(&pd[lcec_hal_data->chans[1].in_offs], lcec_hal_data->chans[1].in_bitp);
 
   /** \todo: do-something with timestamp data! */
-  hal_data->chans[0].Status = EC_READ_U8(&pd[hal_data->chans[0].Status_offs]);
-  hal_data->chans[1].Status = EC_READ_U8(&pd[hal_data->chans[1].Status_offs]);
+  lcec_hal_data->chans[0].Status = EC_READ_U8(&pd[lcec_hal_data->chans[0].Status_offs]);
+  lcec_hal_data->chans[1].Status = EC_READ_U8(&pd[lcec_hal_data->chans[1].Status_offs]);
 
-  hal_data->chans[0].LatchPos = EC_READ_U8(&pd[hal_data->chans[0].LatchPos_offs]);
-  hal_data->chans[1].LatchPos = EC_READ_U8(&pd[hal_data->chans[1].LatchPos_offs]);
-  hal_data->chans[0].LatchNeg = EC_READ_U8(&pd[hal_data->chans[0].LatchNeg_offs]);
-  hal_data->chans[1].LatchNeg = EC_READ_U8(&pd[hal_data->chans[1].LatchNeg_offs]);
+  lcec_hal_data->chans[0].LatchPos = EC_READ_U8(&pd[lcec_hal_data->chans[0].LatchPos_offs]);
+  lcec_hal_data->chans[1].LatchPos = EC_READ_U8(&pd[lcec_hal_data->chans[1].LatchPos_offs]);
+  lcec_hal_data->chans[0].LatchNeg = EC_READ_U8(&pd[lcec_hal_data->chans[0].LatchNeg_offs]);
+  lcec_hal_data->chans[1].LatchNeg = EC_READ_U8(&pd[lcec_hal_data->chans[1].LatchNeg_offs]);
 }
 

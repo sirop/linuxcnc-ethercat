@@ -97,14 +97,14 @@ static ec_sync_info_t lcec_el2521_syncs[] = {
 };
 
 
-void lcec_el2521_check_scale(lcec_el2521_data_t *hal_data);
+void lcec_el2521_check_scale(lcec_el2521_data_t *lcec_hal_data);
 
 void lcec_el2521_read(struct lcec_slave *slave, long period);
 void lcec_el2521_write(struct lcec_slave *slave, long period);
 
 int lcec_el2521_init(int comp_id, struct lcec_slave *slave, ec_pdo_entry_reg_t *pdo_entry_regs) {
   lcec_master_t *master = slave->master;
-  lcec_el2521_data_t *hal_data;
+  lcec_el2521_data_t *lcec_hal_data;
   int err;
   double ramp_factor;
 
@@ -113,179 +113,179 @@ int lcec_el2521_init(int comp_id, struct lcec_slave *slave, ec_pdo_entry_reg_t *
   slave->proc_write = lcec_el2521_write;
 
   // alloc hal memory
-  if ((hal_data = hal_malloc(sizeof(lcec_el2521_data_t))) == NULL) {
+  if ((lcec_hal_data = hal_malloc(sizeof(lcec_el2521_data_t))) == NULL) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "hal_malloc() for slave %s.%s failed\n", master->name, slave->name);
     return -EIO;
   }
-  memset(hal_data, 0, sizeof(lcec_el2521_data_t));
-  slave->hal_data = hal_data;
+  memset(lcec_hal_data, 0, sizeof(lcec_el2521_data_t));
+  slave->lcec_hal_data = lcec_hal_data;
 
   // read sdos
-  if ((hal_data->sdo_req_base_freq = lcec_read_sdo(slave, 0x8001, 0x02, 4)) == NULL) {
+  if ((lcec_hal_data->sdo_req_base_freq = lcec_read_sdo(slave, 0x8001, 0x02, 4)) == NULL) {
     return -EIO;
   }
-  hal_data->sdo_base_freq = EC_READ_U32(ecrt_sdo_request_data(hal_data->sdo_req_base_freq));
-  if ((hal_data->sdo_req_ramp_rise = lcec_read_sdo(slave, 0x8001, 0x04, 2)) == NULL) {
+  lcec_hal_data->sdo_base_freq = EC_READ_U32(ecrt_sdo_request_data(lcec_hal_data->sdo_req_base_freq));
+  if ((lcec_hal_data->sdo_req_ramp_rise = lcec_read_sdo(slave, 0x8001, 0x04, 2)) == NULL) {
     return -EIO;
   }
-  hal_data->sdo_ramp_rise = EC_READ_U16(ecrt_sdo_request_data(hal_data->sdo_req_ramp_rise));
-  if ((hal_data->sdo_req_ramp_fall = lcec_read_sdo(slave, 0x8001, 0x05, 2)) == NULL) {
+  lcec_hal_data->sdo_ramp_rise = EC_READ_U16(ecrt_sdo_request_data(lcec_hal_data->sdo_req_ramp_rise));
+  if ((lcec_hal_data->sdo_req_ramp_fall = lcec_read_sdo(slave, 0x8001, 0x05, 2)) == NULL) {
     return -EIO;
   }
-  hal_data->sdo_ramp_fall = EC_READ_U16(ecrt_sdo_request_data(hal_data->sdo_req_ramp_fall));
-  if ((hal_data->sdo_req_ramp_factor = lcec_read_sdo(slave, 0x8000, 0x07, 2)) == NULL) {
+  lcec_hal_data->sdo_ramp_fall = EC_READ_U16(ecrt_sdo_request_data(lcec_hal_data->sdo_req_ramp_fall));
+  if ((lcec_hal_data->sdo_req_ramp_factor = lcec_read_sdo(slave, 0x8000, 0x07, 2)) == NULL) {
     return -EIO;
   }
-  hal_data->sdo_ramp_factor = EC_READ_U16(ecrt_sdo_request_data(hal_data->sdo_req_ramp_factor));
-  if ((hal_data->sdo_req_max_freq = lcec_read_sdo(slave, 0x8800, 0x02, 2)) == NULL) {
+  lcec_hal_data->sdo_ramp_factor = EC_READ_U16(ecrt_sdo_request_data(lcec_hal_data->sdo_req_ramp_factor));
+  if ((lcec_hal_data->sdo_req_max_freq = lcec_read_sdo(slave, 0x8800, 0x02, 2)) == NULL) {
     return -EIO;
   }
-  hal_data->sdo_max_freq = EC_READ_U16(ecrt_sdo_request_data(hal_data->sdo_req_max_freq));
+  lcec_hal_data->sdo_max_freq = EC_READ_U16(ecrt_sdo_request_data(lcec_hal_data->sdo_req_max_freq));
 
   // initializer sync info
   slave->sync_info = lcec_el2521_syncs;
 
   // initialize POD entries
-  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x6000, 0x01, &hal_data->state_pdo_os, NULL);
-  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x6000, 0x02, &hal_data->count_pdo_os, NULL);
-  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x7000, 0x01, &hal_data->ctrl_pdo_os, NULL);
-  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x7000, 0x02, &hal_data->freq_pdo_os, NULL);
+  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x6000, 0x01, &lcec_hal_data->state_pdo_os, NULL);
+  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x6000, 0x02, &lcec_hal_data->count_pdo_os, NULL);
+  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x7000, 0x01, &lcec_hal_data->ctrl_pdo_os, NULL);
+  LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x7000, 0x02, &lcec_hal_data->freq_pdo_os, NULL);
 
   // export pins
-  if ((err = hal_pin_s32_newf(HAL_OUT, &(hal_data->count), comp_id, "%s.%s.%s.stp-counts", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
+  if ((err = hal_pin_s32_newf(HAL_OUT, &(lcec_hal_data->count), comp_id, "%s.%s.%s.stp-counts", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.stp-counts failed\n", LCEC_MODULE_NAME, master->name, slave->name);
     return err;
   }
-  if ((err = hal_pin_float_newf(HAL_OUT, &(hal_data->pos_fb), comp_id, "%s.%s.%s.stp-pos-fb", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
+  if ((err = hal_pin_float_newf(HAL_OUT, &(lcec_hal_data->pos_fb), comp_id, "%s.%s.%s.stp-pos-fb", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.stp-pos-fb failed\n", LCEC_MODULE_NAME, master->name, slave->name);
     return err;
   }
-  if ((err = hal_pin_bit_newf(HAL_OUT, &(hal_data->ramp_active), comp_id, "%s.%s.%s.stp-ramp-active", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
+  if ((err = hal_pin_bit_newf(HAL_OUT, &(lcec_hal_data->ramp_active), comp_id, "%s.%s.%s.stp-ramp-active", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.stp-ramp-active failed\n", LCEC_MODULE_NAME, master->name, slave->name);
     return err;
   }
-  if ((err = hal_pin_bit_newf(HAL_IN, &(hal_data->ramp_disable), comp_id, "%s.%s.%s.stp-ramp-disable", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
+  if ((err = hal_pin_bit_newf(HAL_IN, &(lcec_hal_data->ramp_disable), comp_id, "%s.%s.%s.stp-ramp-disable", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.stp-ramp-disable failed\n", LCEC_MODULE_NAME, master->name, slave->name);
     return err;
   }
-  if ((err = hal_pin_bit_newf(HAL_OUT, &(hal_data->in_z), comp_id, "%s.%s.%s.stp-in-z", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
+  if ((err = hal_pin_bit_newf(HAL_OUT, &(lcec_hal_data->in_z), comp_id, "%s.%s.%s.stp-in-z", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.stp-in-z failed\n", LCEC_MODULE_NAME, master->name, slave->name);
     return err;
   }
-  if ((err = hal_pin_bit_newf(HAL_OUT, &(hal_data->in_z_not), comp_id, "%s.%s.%s.stp-in-z-not", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
+  if ((err = hal_pin_bit_newf(HAL_OUT, &(lcec_hal_data->in_z_not), comp_id, "%s.%s.%s.stp-in-z-not", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.stp-in-z-not failed\n", LCEC_MODULE_NAME, master->name, slave->name);
     return err;
   }
-  if ((err = hal_pin_bit_newf(HAL_OUT, &(hal_data->in_t), comp_id, "%s.%s.%s.stp-in-t", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
+  if ((err = hal_pin_bit_newf(HAL_OUT, &(lcec_hal_data->in_t), comp_id, "%s.%s.%s.stp-in-t", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.stp-in-t failed\n", LCEC_MODULE_NAME, master->name, slave->name);
     return err;
   }
-  if ((err = hal_pin_bit_newf(HAL_OUT, &(hal_data->in_t_not), comp_id, "%s.%s.%s.stp-in-t-not", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
+  if ((err = hal_pin_bit_newf(HAL_OUT, &(lcec_hal_data->in_t_not), comp_id, "%s.%s.%s.stp-in-t-not", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.stp-in-t-not failed\n", LCEC_MODULE_NAME, master->name, slave->name);
     return err;
   }
-  if ((err = hal_pin_bit_newf(HAL_IN, &(hal_data->enable), comp_id, "%s.%s.%s.stp-enable", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
+  if ((err = hal_pin_bit_newf(HAL_IN, &(lcec_hal_data->enable), comp_id, "%s.%s.%s.stp-enable", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.stp-enable failed\n", LCEC_MODULE_NAME, master->name, slave->name);
     return err;
   }
-  if ((err = hal_pin_float_newf(HAL_IN, &(hal_data->vel_cmd), comp_id, "%s.%s.%s.stp-velo-cmd", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
+  if ((err = hal_pin_float_newf(HAL_IN, &(lcec_hal_data->vel_cmd), comp_id, "%s.%s.%s.stp-velo-cmd", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.stp-velo-cmd failed\n", LCEC_MODULE_NAME, master->name, slave->name);
     return err;
   }
 
   // export parameters
-  if ((err = hal_param_float_newf(HAL_RO, &(hal_data->freq), comp_id, "%s.%s.%s.stp-freq", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
+  if ((err = hal_param_float_newf(HAL_RO, &(lcec_hal_data->freq), comp_id, "%s.%s.%s.stp-freq", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.stp-freq failed\n", LCEC_MODULE_NAME, master->name, slave->name);
     return err;
   }
-  if ((err = hal_param_float_newf(HAL_RO, &(hal_data->maxvel), comp_id, "%s.%s.%s.stp-maxvel", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
+  if ((err = hal_param_float_newf(HAL_RO, &(lcec_hal_data->maxvel), comp_id, "%s.%s.%s.stp-maxvel", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.stp-maxvel failed\n", LCEC_MODULE_NAME, master->name, slave->name);
     return err;
   }
-  if ((err = hal_param_float_newf(HAL_RO, &(hal_data->maxaccel_fall), comp_id, "%s.%s.%s.stp-maxaccel-fall", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
+  if ((err = hal_param_float_newf(HAL_RO, &(lcec_hal_data->maxaccel_fall), comp_id, "%s.%s.%s.stp-maxaccel-fall", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.stp-maxaccel-fall failed\n", LCEC_MODULE_NAME, master->name, slave->name);
     return err;
   }
-  if ((err = hal_param_float_newf(HAL_RO, &(hal_data->maxaccel_rise), comp_id, "%s.%s.%s.stp-maxaccel-rise", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
+  if ((err = hal_param_float_newf(HAL_RO, &(lcec_hal_data->maxaccel_rise), comp_id, "%s.%s.%s.stp-maxaccel-rise", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.stp-maxaccel-rise\n", LCEC_MODULE_NAME, master->name, slave->name);
     return err;
   }
-  if ((err = hal_param_float_newf(HAL_RW, &(hal_data->pos_scale), comp_id, "%s.%s.%s.stp-pos-scale", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
+  if ((err = hal_param_float_newf(HAL_RW, &(lcec_hal_data->pos_scale), comp_id, "%s.%s.%s.stp-pos-scale", LCEC_MODULE_NAME, master->name, slave->name)) != 0) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "exporting pin %s.%s.%s.stp-pos-scale failed\n", LCEC_MODULE_NAME, master->name, slave->name);
     return err;
   }
 
   // set default pin values
-  *(hal_data->count) = 0;
-  *(hal_data->pos_fb) = 0;
-  *(hal_data->ramp_active) = 0;
-  *(hal_data->ramp_disable) = 0;
-  *(hal_data->in_z) = 0;
-  *(hal_data->in_z_not) = 0;
-  *(hal_data->in_t) = 0;
-  *(hal_data->in_t_not) = 0;
-  *(hal_data->enable) = 0;
-  *(hal_data->vel_cmd) = 0.0;
+  *(lcec_hal_data->count) = 0;
+  *(lcec_hal_data->pos_fb) = 0;
+  *(lcec_hal_data->ramp_active) = 0;
+  *(lcec_hal_data->ramp_disable) = 0;
+  *(lcec_hal_data->in_z) = 0;
+  *(lcec_hal_data->in_z_not) = 0;
+  *(lcec_hal_data->in_t) = 0;
+  *(lcec_hal_data->in_t_not) = 0;
+  *(lcec_hal_data->enable) = 0;
+  *(lcec_hal_data->vel_cmd) = 0.0;
 
   // init parameters
-  hal_data->freq = 0.0;
-  hal_data->pos_scale = 1.0;
-  hal_data->old_scale = 0.0;
-  hal_data->scale_recip = 0.0;
-  hal_data->maxvel = 0;
-  hal_data->maxaccel_rise = 0;
-  hal_data->maxaccel_fall = 0;
+  lcec_hal_data->freq = 0.0;
+  lcec_hal_data->pos_scale = 1.0;
+  lcec_hal_data->old_scale = 0.0;
+  lcec_hal_data->scale_recip = 0.0;
+  lcec_hal_data->maxvel = 0;
+  lcec_hal_data->maxaccel_rise = 0;
+  lcec_hal_data->maxaccel_fall = 0;
 
   // init other fields
-  hal_data->last_operational = 0;
-  hal_data->last_hw_count = 0;
+  lcec_hal_data->last_operational = 0;
+  lcec_hal_data->last_hw_count = 0;
 
   // calculate frequency factor
-  if (hal_data->sdo_base_freq != 0) {
-    hal_data->freqscale = (double)0x7fff / (double)hal_data->sdo_base_freq;
-    hal_data->freqscale_recip = 1 / hal_data->freqscale;
+  if (lcec_hal_data->sdo_base_freq != 0) {
+    lcec_hal_data->freqscale = (double)0x7fff / (double)lcec_hal_data->sdo_base_freq;
+    lcec_hal_data->freqscale_recip = 1 / lcec_hal_data->freqscale;
   } else {
-    hal_data->freqscale = 0;
-    hal_data->freqscale_recip = 0;
+    lcec_hal_data->freqscale = 0;
+    lcec_hal_data->freqscale_recip = 0;
   }
 
   // calculate max frequency
-  if (hal_data->sdo_max_freq != 0) {
-    hal_data->max_freq = (double)hal_data->sdo_max_freq * hal_data->freqscale_recip;
+  if (lcec_hal_data->sdo_max_freq != 0) {
+    lcec_hal_data->max_freq = (double)lcec_hal_data->sdo_max_freq * lcec_hal_data->freqscale_recip;
   } else {
-    hal_data->max_freq = (double)(hal_data->sdo_base_freq);
+    lcec_hal_data->max_freq = (double)(lcec_hal_data->sdo_base_freq);
   }
 
   // calculate maximum acceleartions in Hz/s
-  if ((hal_data->sdo_ramp_factor & 0x01) != 0) {
+  if ((lcec_hal_data->sdo_ramp_factor & 0x01) != 0) {
     ramp_factor = 1000;
   } else {
     ramp_factor = 10;
   }
-  hal_data->max_ac_rise = ramp_factor * (double)(hal_data->sdo_ramp_rise);
-  hal_data->max_ac_fall = ramp_factor * (double)(hal_data->sdo_ramp_fall);
+  lcec_hal_data->max_ac_rise = ramp_factor * (double)(lcec_hal_data->sdo_ramp_rise);
+  lcec_hal_data->max_ac_fall = ramp_factor * (double)(lcec_hal_data->sdo_ramp_fall);
 
   return 0;
 }
 
-void lcec_el2521_check_scale(lcec_el2521_data_t *hal_data) {
+void lcec_el2521_check_scale(lcec_el2521_data_t *lcec_hal_data) {
   // check for change in scale value
-  if (hal_data->pos_scale != hal_data->old_scale) {
+  if (lcec_hal_data->pos_scale != lcec_hal_data->old_scale) {
     // validate the new scale value
-    if ((hal_data->pos_scale < 1e-20) && (hal_data->pos_scale > -1e-20)) {
+    if ((lcec_hal_data->pos_scale < 1e-20) && (lcec_hal_data->pos_scale > -1e-20)) {
       // value too small, divide by zero is a bad thing
-      hal_data->pos_scale = 1.0;
+      lcec_hal_data->pos_scale = 1.0;
     }
     // get ready to detect future scale changes
-    hal_data->old_scale = hal_data->pos_scale;
+    lcec_hal_data->old_scale = lcec_hal_data->pos_scale;
     // we will need the reciprocal
-    hal_data->scale_recip = 1.0 / hal_data->pos_scale;
+    lcec_hal_data->scale_recip = 1.0 / lcec_hal_data->pos_scale;
   }
 }
 
 void lcec_el2521_read(struct lcec_slave *slave, long period) {
   lcec_master_t *master = slave->master;
-  lcec_el2521_data_t *hal_data = (lcec_el2521_data_t *) slave->hal_data;
+  lcec_el2521_data_t *lcec_hal_data = (lcec_el2521_data_t *) slave->lcec_hal_data;
   uint8_t *pd = master->process_data;
   int16_t hw_count, hw_count_diff;
   uint16_t state;
@@ -293,77 +293,77 @@ void lcec_el2521_read(struct lcec_slave *slave, long period) {
 
   // wait for slave to be operational
   if (!slave->state.operational) {
-    hal_data->last_operational = 0;
+    lcec_hal_data->last_operational = 0;
     return;
   }
 
   // check for change in scale value
-  lcec_el2521_check_scale(hal_data);
+  lcec_el2521_check_scale(lcec_hal_data);
 
   // calculate scaled limits
-  hal_data->maxvel = hal_data->max_freq * hal_data->scale_recip;
-  hal_data->maxaccel_rise = hal_data->max_ac_rise * hal_data->scale_recip;
-  hal_data->maxaccel_fall = hal_data->max_ac_fall * hal_data->scale_recip;
+  lcec_hal_data->maxvel = lcec_hal_data->max_freq * lcec_hal_data->scale_recip;
+  lcec_hal_data->maxaccel_rise = lcec_hal_data->max_ac_rise * lcec_hal_data->scale_recip;
+  lcec_hal_data->maxaccel_fall = lcec_hal_data->max_ac_fall * lcec_hal_data->scale_recip;
 
   // read state word
-  state = EC_READ_U16(&pd[hal_data->state_pdo_os]);
-  *(hal_data->ramp_active) = (state >> 1) & 1;
+  state = EC_READ_U16(&pd[lcec_hal_data->state_pdo_os]);
+  *(lcec_hal_data->ramp_active) = (state >> 1) & 1;
   in = (state >> 5) & 1;
-  *(hal_data->in_z) = in;
-  *(hal_data->in_z_not) = !in;
+  *(lcec_hal_data->in_z) = in;
+  *(lcec_hal_data->in_z_not) = !in;
   in = (state >> 4) & 1;
-  *(hal_data->in_t) = in;
-  *(hal_data->in_t_not) = !in;
+  *(lcec_hal_data->in_t) = in;
+  *(lcec_hal_data->in_t_not) = !in;
 
   // get counter diff
-  hw_count = EC_READ_S16(&pd[hal_data->count_pdo_os]);
-  hw_count_diff = hw_count - hal_data->last_hw_count;
-  hal_data->last_hw_count = hw_count;
-  if (!hal_data->last_operational) {
+  hw_count = EC_READ_S16(&pd[lcec_hal_data->count_pdo_os]);
+  hw_count_diff = hw_count - lcec_hal_data->last_hw_count;
+  lcec_hal_data->last_hw_count = hw_count;
+  if (!lcec_hal_data->last_operational) {
     hw_count_diff = 0;
   }
 
   // update raw count
-  *(hal_data->count) += hw_count_diff;
+  *(lcec_hal_data->count) += hw_count_diff;
 
   // scale position
-  *(hal_data->pos_fb) = (double) (*(hal_data->count)) * hal_data->scale_recip;
+  *(lcec_hal_data->pos_fb) = (double) (*(lcec_hal_data->count)) * lcec_hal_data->scale_recip;
 
-  hal_data->last_operational = 1;
+  lcec_hal_data->last_operational = 1;
 }
 
 void lcec_el2521_write(struct lcec_slave *slave, long period) {
   lcec_master_t *master = slave->master;
-  lcec_el2521_data_t *hal_data = (lcec_el2521_data_t *) slave->hal_data;
+  lcec_el2521_data_t *lcec_hal_data = (lcec_el2521_data_t *) slave->lcec_hal_data;
   uint8_t *pd = master->process_data;
   uint16_t ctrl;
   int32_t freq_raw;
 
   // check for change in scale value
-  lcec_el2521_check_scale(hal_data);
+  lcec_el2521_check_scale(lcec_hal_data);
 
   // write control word
   ctrl = 0;
-  if (*(hal_data->ramp_disable)) {
+  if (*(lcec_hal_data->ramp_disable)) {
     ctrl |= (1 << 1);
   }
-  EC_WRITE_S16(&pd[hal_data->ctrl_pdo_os], ctrl);
+  EC_WRITE_S16(&pd[lcec_hal_data->ctrl_pdo_os], ctrl);
 
   // update frequency
-  if (*(hal_data->enable)) {
-    hal_data->freq = *(hal_data->vel_cmd) * hal_data->pos_scale;
+  if (*(lcec_hal_data->enable)) {
+    lcec_hal_data->freq = *(lcec_hal_data->vel_cmd) * lcec_hal_data->pos_scale;
   } else {
-    hal_data->freq = 0;
+    lcec_hal_data->freq = 0;
   }
 
   // output frequency
-  freq_raw = hal_data->freq * hal_data->freqscale;
+  freq_raw = lcec_hal_data->freq * lcec_hal_data->freqscale;
   if (freq_raw > 0x7fff) {
     freq_raw = 0x7fff;
   }
   if (freq_raw < -0x7fff) {
     freq_raw = -0x7fff;
   }
-  EC_WRITE_S16(&pd[hal_data->freq_pdo_os], freq_raw);
+  EC_WRITE_S16(&pd[lcec_hal_data->freq_pdo_os], freq_raw);
 }
 

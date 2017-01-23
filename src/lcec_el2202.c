@@ -77,7 +77,7 @@ void lcec_el2202_write(struct lcec_slave *slave, long period);
 int lcec_el2202_init(int comp_id, struct lcec_slave *slave, ec_pdo_entry_reg_t *pdo_entry_regs) {
   lcec_master_t *master = slave->master;
 
-  lcec_el2202_data_t *hal_data;
+  lcec_el2202_data_t *lcec_hal_data;
   lcec_el2202_chan_t *chan;
 
   int i;
@@ -87,19 +87,19 @@ int lcec_el2202_init(int comp_id, struct lcec_slave *slave, ec_pdo_entry_reg_t *
   slave->proc_write = lcec_el2202_write;
 
   // alloc hal memory
-  if ((hal_data = hal_malloc(sizeof(lcec_el2202_data_t))) == NULL) {
+  if ((lcec_hal_data = hal_malloc(sizeof(lcec_el2202_data_t))) == NULL) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "hal_malloc() for slave %s.%s failed\n", master->name, slave->name);
     return -EIO;
   }
-  memset(hal_data, 0, sizeof(lcec_el2202_data_t));
-  slave->hal_data = hal_data;
+  memset(lcec_hal_data, 0, sizeof(lcec_el2202_data_t));
+  slave->lcec_hal_data = lcec_hal_data;
 
   // initializer sync info
   slave->sync_info = lcec_el2202_syncs;
 
   // initialize pins
   for (i=0; i<LCEC_EL2202_CHANS; i++) {
-    chan = &hal_data->chans[i];
+    chan = &lcec_hal_data->chans[i];
 
     // initialize PDO entries     position      vend.id     prod.code   index              sindx  offset             bit pos
     LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x7000 + (i << 4), 0x01, &chan->out_offs, &chan->out_bitp);
@@ -128,13 +128,13 @@ void lcec_el2202_write(struct lcec_slave *slave, long period) {
   lcec_master_t *master = slave->master;
   uint8_t *pd = master->process_data;
 
-  lcec_el2202_data_t *hal_data = (lcec_el2202_data_t *) slave->hal_data;
+  lcec_el2202_data_t *lcec_hal_data = (lcec_el2202_data_t *) slave->lcec_hal_data;
   lcec_el2202_chan_t *chan;
 
   int i;
 
   for (i=0; i<LCEC_EL2202_CHANS; i++) {
-    chan = &hal_data->chans[i];
+    chan = &lcec_hal_data->chans[i];
 
     // set output
     EC_WRITE_BIT(&pd[chan->out_offs], chan->out_bitp, *(chan->out));

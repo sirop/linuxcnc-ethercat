@@ -323,7 +323,7 @@ void lcec_el7342_set_info(lcec_el7342_chan_t *chan, hal_s32_t *raw_info, hal_u32
 
 int lcec_el7342_init(int comp_id, struct lcec_slave *slave, ec_pdo_entry_reg_t *pdo_entry_regs) {
   lcec_master_t *master = slave->master;
-  lcec_el7342_data_t *hal_data;
+  lcec_el7342_data_t *lcec_hal_data;
   int i;
   lcec_el7342_chan_t *chan;
   uint8_t info1_select, info2_select;
@@ -334,22 +334,22 @@ int lcec_el7342_init(int comp_id, struct lcec_slave *slave, ec_pdo_entry_reg_t *
   slave->proc_write = lcec_el7342_write;
 
   // alloc hal memory
-  if ((hal_data = hal_malloc(sizeof(lcec_el7342_data_t))) == NULL) {
+  if ((lcec_hal_data = hal_malloc(sizeof(lcec_el7342_data_t))) == NULL) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "hal_malloc() for slave %s.%s failed\n", master->name, slave->name);
     return -EIO;
   }
-  memset(hal_data, 0, sizeof(lcec_el7342_data_t));
-  slave->hal_data = hal_data;
+  memset(lcec_hal_data, 0, sizeof(lcec_el7342_data_t));
+  slave->lcec_hal_data = lcec_hal_data;
 
   // initialize sync info
   slave->sync_info = lcec_el7342_syncs;
 
   // initialize global data
-  hal_data->last_operational = 0;
+  lcec_hal_data->last_operational = 0;
 
   // initialize pins
   for (i=0; i<LCEC_EL7342_CHANS; i++) {
-    chan = &hal_data->chans[i];
+    chan = &lcec_hal_data->chans[i];
 
     // read sdos
     // Info1 selector
@@ -664,7 +664,7 @@ int lcec_el7342_init(int comp_id, struct lcec_slave *slave, ec_pdo_entry_reg_t *
 
 void lcec_el7342_read(struct lcec_slave *slave, long period) {
   lcec_master_t *master = slave->master;
-  lcec_el7342_data_t *hal_data = (lcec_el7342_data_t *) slave->hal_data;
+  lcec_el7342_data_t *lcec_hal_data = (lcec_el7342_data_t *) slave->lcec_hal_data;
   uint8_t *pd = master->process_data;
   int i;
   lcec_el7342_chan_t *chan;
@@ -672,13 +672,13 @@ void lcec_el7342_read(struct lcec_slave *slave, long period) {
 
   // wait for slave to be operational
   if (!slave->state.operational) {
-    hal_data->last_operational = 0;
+    lcec_hal_data->last_operational = 0;
     return;
   }
 
   // check inputs
   for (i=0; i<LCEC_EL7342_CHANS; i++) {
-    chan = &hal_data->chans[i];
+    chan = &lcec_hal_data->chans[i];
 
     // check for change in scale value
     if (*(chan->pos_scale) != chan->enc_old_scale) {
@@ -729,7 +729,7 @@ void lcec_el7342_read(struct lcec_slave *slave, long period) {
     lcec_el7342_set_info(chan, chan->dcm_raw_info2, chan->dcm_sel_info2);
 
     // check for operational change of slave
-    if (!hal_data->last_operational) {
+    if (!lcec_hal_data->last_operational) {
       chan->enc_last_count = raw_count;
     }
 
@@ -769,12 +769,12 @@ void lcec_el7342_read(struct lcec_slave *slave, long period) {
     *(chan->pos) = *(chan->count) * chan->enc_scale_recip;
   }
 
-  hal_data->last_operational = 1;
+  lcec_hal_data->last_operational = 1;
 }
 
 void lcec_el7342_write(struct lcec_slave *slave, long period) {
   lcec_master_t *master = slave->master;
-  lcec_el7342_data_t *hal_data = (lcec_el7342_data_t *) slave->hal_data;
+  lcec_el7342_data_t *lcec_hal_data = (lcec_el7342_data_t *) slave->lcec_hal_data;
   uint8_t *pd = master->process_data;
   int i;
   lcec_el7342_chan_t *chan;
@@ -782,7 +782,7 @@ void lcec_el7342_write(struct lcec_slave *slave, long period) {
 
   // set outputs
   for (i=0; i<LCEC_EL7342_CHANS; i++) {
-    chan = &hal_data->chans[i];
+    chan = &lcec_hal_data->chans[i];
 
     // validate duty cycle limits, both limits must be between
     // 0.0 and 1.0 (inclusive) and max must be greater then min

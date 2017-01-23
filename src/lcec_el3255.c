@@ -133,7 +133,7 @@ void lcec_el3255_read(struct lcec_slave *slave, long period);
 
 int lcec_el3255_init(int comp_id, struct lcec_slave *slave, ec_pdo_entry_reg_t *pdo_entry_regs) {
   lcec_master_t *master = slave->master;
-  lcec_el3255_data_t *hal_data;
+  lcec_el3255_data_t *lcec_hal_data;
   lcec_el3255_chan_t *chan;
   int i;
   int err;
@@ -142,19 +142,19 @@ int lcec_el3255_init(int comp_id, struct lcec_slave *slave, ec_pdo_entry_reg_t *
   slave->proc_read = lcec_el3255_read;
 
   // alloc hal memory
-  if ((hal_data = hal_malloc(sizeof(lcec_el3255_data_t))) == NULL) {
+  if ((lcec_hal_data = hal_malloc(sizeof(lcec_el3255_data_t))) == NULL) {
     rtapi_print_msg(RTAPI_MSG_ERR, LCEC_MSG_PFX "hal_malloc() for slave %s.%s failed\n", master->name, slave->name);
     return -EIO;
   }
-  memset(hal_data, 0, sizeof(lcec_el3255_data_t));
-  slave->hal_data = hal_data;
+  memset(lcec_hal_data, 0, sizeof(lcec_el3255_data_t));
+  slave->lcec_hal_data = lcec_hal_data;
 
   // initialize sync info
   slave->sync_info = lcec_el3255_syncs;
 
   // initialize pins
   for (i=0; i<LCEC_EL3255_CHANS; i++) {
-    chan = &hal_data->chans[i];
+    chan = &lcec_hal_data->chans[i];
 
     // initialize POD entries
     LCEC_PDO_INIT(pdo_entry_regs, slave->index, slave->vid, slave->pid, 0x6000 + (i << 4), 0x01, &chan->ovr_pdo_os, &chan->ovr_pdo_bp);
@@ -213,7 +213,7 @@ int lcec_el3255_init(int comp_id, struct lcec_slave *slave, ec_pdo_entry_reg_t *
 
 void lcec_el3255_read(struct lcec_slave *slave, long period) {
   lcec_master_t *master = slave->master;
-  lcec_el3255_data_t *hal_data = (lcec_el3255_data_t *) slave->hal_data;
+  lcec_el3255_data_t *lcec_hal_data = (lcec_el3255_data_t *) slave->lcec_hal_data;
   uint8_t *pd = master->process_data;
   int i;
   lcec_el3255_chan_t *chan;
@@ -226,7 +226,7 @@ void lcec_el3255_read(struct lcec_slave *slave, long period) {
 
   // check inputs
   for (i=0; i<LCEC_EL3255_CHANS; i++) {
-    chan = &hal_data->chans[i];
+    chan = &lcec_hal_data->chans[i];
 
     // update state
     *(chan->overrange) = EC_READ_BIT(&pd[chan->ovr_pdo_os], chan->ovr_pdo_bp);
