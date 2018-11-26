@@ -1,0 +1,121 @@
+<masters>
+  <master idx="0" appTimePeriod="1000000" refClockSyncCycles="1000">  
+    <slave idx="0" type="generic" vid="000000ab" pid="00001030" configPdos="true">
+      <dcConf assignActivate="0330" sync0Cycle="*1" sync0Shift="0" />
+      <syncManager idx="2" dir="out">      
+      <pdo idx="1600">
+          <pdoEntry idx="6040" subIdx="00" bitLen="16" halPin="Control Word Axis A" halType="u32"/>
+          <pdoEntry idx="60ff" subIdx="00" bitLen="32" halPin="Target Velocity Axis A" halType="s32"/>
+          <pdoEntry idx="6071" subIdx="00" bitLen="16" halPin="Target Torque Axis A" halType="s32"/>
+          <pdoEntry idx="6840" subIdx="00" bitLen="16" halPin="Control Word Axis B" halType="u32"/>
+          <pdoEntry idx="68ff" subIdx="00" bitLen="32" halPin="Target Velocity Axis B" halType="s32"/>
+          <pdoEntry idx="6871" subIdx="00" bitLen="16" halPin="Target Torque Axis B" halType="s32"/>
+          <pdoEntry idx="6060" subIdx="00" bitLen="32" halPin="Set_Operational_Mode_Axis_A" halType="s32"/>
+          <pdoEntry idx="6860" subIdx="00" bitLen="32" halPin="Set_Operational_Mode_Axis_B" halType="s32"/>
+        </pdo>
+      </syncManager>
+      <syncManager idx="3" dir="in">
+        <pdo idx="1a00">         
+          <pdoEntry idx="6041" subIdx="00" bitLen="16" halPin="Status Word Axis A" halType="u32"/>
+          <pdoEntry idx="606c" subIdx="00" bitLen="32" halPin="Actual Velocity Axis A" halType="s32"/>
+          <pdoEntry idx="60f4" subIdx="00" bitLen="32" halPin="Position Error Axis A" halType="s32"/>
+          <pdoEntry idx="6841" subIdx="00" bitLen="16" halPin="Status Word Axis B" halType="u32"/>
+          <pdoEntry idx="686c" subIdx="00" bitLen="32" halPin="Actual Velocity Axis B" halType="s32"/>
+          <pdoEntry idx="68f4" subIdx="00" bitLen="32" halPin="Position Error Axis B" halType="s32"/>
+        </pdo>
+        <pdo idx="1a01">         
+          <pdoEntry idx="2183" subIdx="00" bitLen="32" halPin="Latched Status Axis A IN" halType="u32"/>
+          <pdoEntry idx="2983" subIdx="00" bitLen="32" halPin="Latched Status Axis B IN" halType="u32"/>
+          <pdoEntry idx="221d" subIdx="00" bitLen="16" halPin="Commanded Current Axis A" halType="s32"/>
+          <pdoEntry idx="2a1d" subIdx="00" bitLen="16" halPin="Commanded Current Axis B" halType="s32"/>
+          <pdoEntry idx="221c" subIdx="00" bitLen="16" halPin="Actual Current Axis A" halType="s32"/>
+          <pdoEntry idx="2a1c" subIdx="00" bitLen="16" halPin="Actual Current Axis B" halType="s32"/>  
+          <pdoEntry idx="6077" subIdx="00" bitLen="16" halPin="Torque Actual Axis A" halType="s32"/> 
+          <pdoEntry idx="6877" subIdx="00" bitLen="16" halPin="Torque Actual Axis B" halType="s32"/>  
+        </pdo>
+        <pdo idx="1a02">
+          <pdoEntry idx="6061" subIdx="00" bitLen="8" halPin="Display_Operational_Mode_Axis_A" halType="u32"/>
+          <pdoEntry idx="6861" subIdx="00" bitLen="8" halPin="Display_Operational_Mode_Axis_B" halType="u32"/>
+        </pdo>
+      </syncManager>
+    </slave>
+     <slave idx="1" type="generic" vid="000000ab" pid="00001030" configPdos="true">
+      <dcConf assignActivate="0330" sync0Cycle="*1" sync0Shift="0" />
+      <syncManager idx="2" dir="out">      
+      <pdo idx="1600">
+          <pdoEntry idx="6040" subIdx="00" bitLen="16" halPin="Control Word Axis A" halType="u32"/>
+          <pdoEntry idx="60ff" subIdx="00" bitLen="32" halPin="Target Velocity Axis A" halType="s32"/>
+          <pdoEntry idx="6071" subIdx="00" bitLen="16" halPin="Target Torque Axis A" halType="s32"/>
+          <pdoEntry idx="6840" subIdx="00" bitLen="16" halPin="Control Word Axis B" halType="u32"/>
+          <pdoEntry idx="68ff" subIdx="00" bitLen="32" halPin="Target Velocity Axis B" halType="s32"/>
+          <pdoEntry idx="6871" subIdx="00" bitLen="16" halPin="Target Torque Axis B" halType="s32"/>
+          <pdoEntry idx="6060" subIdx="00" bitLen="32" halPin="Set_Operational_Mode_Axis_A" halType="s32"/>
+          <pdoEntry idx="6860" subIdx="00" bitLen="32" halPin="Set_Operational_Mode_Axis_B" halType="s32"/>
+        </pdo>
+      </syncManager>
+      <syncManager idx="3" dir="in">
+        <pdo idx="1a00">         
+          <pdoEntry idx="6041" subIdx="00" bitLen="16" halPin="Status Word Axis A" halType="u32"/>
+          <pdoEntry idx="606c" subIdx="00" bitLen="32" halPin="Actual Velocity Axis A" halType="s32"/>
+          <pdoEntry idx="60f4" subIdx="00" bitLen="32" halPin="Position Error Axis A" halType="s32"/>
+          <pdoEntry idx="6841" subIdx="00" bitLen="16" halPin="Status Word Axis B" halType="u32"/>
+          <pdoEntry idx="686c" subIdx="00" bitLen="32" halPin="Actual Velocity Axis B" halType="s32"/>
+          <pdoEntry idx="68f4" subIdx="00" bitLen="32" halPin="Position Error Axis B" halType="s32"/>
+        </pdo>
+        <pdo idx="1a01">         
+          <pdoEntry idx="2183" subIdx="00" bitLen="32" halPin="Latched Status Axis A IN" halType="u32"/>
+          <pdoEntry idx="2983" subIdx="00" bitLen="32" halPin="Latched Status Axis B IN" halType="u32"/>
+          <pdoEntry idx="221d" subIdx="00" bitLen="16" halPin="Commanded Current Axis A" halType="s32"/>
+          <pdoEntry idx="2a1d" subIdx="00" bitLen="16" halPin="Commanded Current Axis B" halType="s32"/>
+          <pdoEntry idx="221c" subIdx="00" bitLen="16" halPin="Actual Current Axis A" halType="s32"/>
+          <pdoEntry idx="2a1c" subIdx="00" bitLen="16" halPin="Actual Current Axis B" halType="s32"/>
+          <pdoEntry idx="6077" subIdx="00" bitLen="16" halPin="Torque Actual Axis A" halType="s32"/>
+          <pdoEntry idx="6877" subIdx="00" bitLen="16" halPin="Torque Actual Axis B" halType="s32"/>
+        </pdo>
+        <pdo idx="1a02">
+          <pdoEntry idx="6061" subIdx="00" bitLen="8" halPin="Display_Operational_Mode_Axis_A" halType="u32"/>
+          <pdoEntry idx="6861" subIdx="00" bitLen="8" halPin="Display_Operational_Mode_Axis_B" halType="u32"/>
+        </pdo>
+      </syncManager>
+    </slave>
+    <slave idx="2" type="generic" vid="000000ab" pid="00001030" configPdos="true">
+      <dcConf assignActivate="0330" sync0Cycle="*1" sync0Shift="0" />
+      <syncManager idx="2" dir="out">      
+      <pdo idx="1600">
+          <pdoEntry idx="6040" subIdx="00" bitLen="16" halPin="Control Word Axis A" halType="u32"/>
+          <pdoEntry idx="60ff" subIdx="00" bitLen="32" halPin="Target Velocity Axis A" halType="s32"/>
+          <pdoEntry idx="6071" subIdx="00" bitLen="16" halPin="Target Torque Axis A" halType="s32"/>
+          <pdoEntry idx="6840" subIdx="00" bitLen="16" halPin="Control Word Axis B" halType="u32"/>
+          <pdoEntry idx="68ff" subIdx="00" bitLen="32" halPin="Target Velocity Axis B" halType="s32"/>
+          <pdoEntry idx="6871" subIdx="00" bitLen="16" halPin="Target Torque Axis B" halType="s32"/>
+          <pdoEntry idx="6060" subIdx="00" bitLen="32" halPin="Set_Operational_Mode_Axis_A" halType="s32"/>
+          <pdoEntry idx="6860" subIdx="00" bitLen="32" halPin="Set_Operational_Mode_Axis_B" halType="s32"/>
+        </pdo>
+      </syncManager>
+      <syncManager idx="3" dir="in">
+        <pdo idx="1a00">         
+          <pdoEntry idx="6041" subIdx="00" bitLen="16" halPin="Status Word Axis A" halType="u32"/>
+          <pdoEntry idx="606c" subIdx="00" bitLen="32" halPin="Actual Velocity Axis A" halType="s32"/>
+          <pdoEntry idx="60f4" subIdx="00" bitLen="32" halPin="Position Error Axis A" halType="s32"/>
+          <pdoEntry idx="6841" subIdx="00" bitLen="16" halPin="Status Word Axis B" halType="u32"/>
+          <pdoEntry idx="686c" subIdx="00" bitLen="32" halPin="Actual Velocity Axis B" halType="s32"/>
+          <pdoEntry idx="68f4" subIdx="00" bitLen="32" halPin="Position Error Axis B" halType="s32"/>
+        </pdo>
+        <pdo idx="1a01">         
+          <pdoEntry idx="2183" subIdx="00" bitLen="32" halPin="Latched Status Axis A IN" halType="u32"/>
+          <pdoEntry idx="2983" subIdx="00" bitLen="32" halPin="Latched Status Axis B IN" halType="u32"/>
+          <pdoEntry idx="221d" subIdx="00" bitLen="16" halPin="Commanded Current Axis A" halType="s32"/>
+          <pdoEntry idx="2a1d" subIdx="00" bitLen="16" halPin="Commanded Current Axis B" halType="s32"/>
+          <pdoEntry idx="221c" subIdx="00" bitLen="16" halPin="Actual Current Axis A" halType="s32"/>
+          <pdoEntry idx="2a1c" subIdx="00" bitLen="16" halPin="Actual Current Axis B" halType="s32"/>  
+          <pdoEntry idx="6077" subIdx="00" bitLen="16" halPin="Torque Actual Axis A" halType="s32"/> 
+          <pdoEntry idx="6877" subIdx="00" bitLen="16" halPin="Torque Actual Axis B" halType="s32"/>  
+        </pdo>
+        <pdo idx="1a02">
+          <pdoEntry idx="6061" subIdx="00" bitLen="8" halPin="Display_Operational_Mode_Axis_A" halType="u32"/>
+          <pdoEntry idx="6861" subIdx="00" bitLen="8" halPin="Display_Operational_Mode_Axis_B" halType="u32"/>
+        </pdo>
+      </syncManager>
+    </slave>
+  </master>
+</masters>
