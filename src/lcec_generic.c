@@ -177,7 +177,7 @@ void lcec_generic_write(struct lcec_slave *slave, long period) {
         fval = *((hal_float_t *) hal_data->pin[0]);
         fval += hal_data->floatOffset;
         fval *= hal_data->floatScale;
-        lcec_generic_write_float(pd, hal_data, fval));
+        lcec_generic_write_float(pd, hal_data, fval);
         break;
 
       default:
