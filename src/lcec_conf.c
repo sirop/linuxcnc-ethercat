@@ -1248,15 +1248,21 @@ static void parseComplexEntryAttrs(LCEC_CONF_XML_INST_T *inst, int next, const c
         continue;
       }
       if (strcasecmp(val, "float") == 0) {
-        p->subType = lcecPdoEntTypeFloatSigned;
+        if (p->bitLength==32)
+            p->subType = lcecPdoEntTypeFloat32;
+        else {
+              if (p->bitLength==64)
+                 p->subType = lcecPdoEntTypeFloat64;
+              else {
+                    fprintf(stderr, "%s: ERROR: float's bitLen attribute in pdoEntry %s should be either 32 or 64\n", modname, val);
+                    XML_StopParser(inst->parser, 0);
+                    return; 
+              }
+        }
         p->halType = HAL_FLOAT;
         continue;
       }
-      if (strcasecmp(val, "float-unsigned") == 0) {
-        p->subType = lcecPdoEntTypeFloatUnsigned;
-        p->halType = HAL_FLOAT;
-        continue;
-      }
+
       fprintf(stderr, "%s: ERROR: Invalid complexEntry halType %s\n", modname, val);
       XML_StopParser(inst->parser, 0);
       return;
