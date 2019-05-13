@@ -24,8 +24,10 @@ void lcec_generic_write(struct lcec_slave *slave, long period);
 
 hal_s32_t lcec_generic_read_s32(uint8_t *pd, lcec_generic_pin_t *hal_data);
 hal_u32_t lcec_generic_read_u32(uint8_t *pd, lcec_generic_pin_t *hal_data);
+double lcec_generic_read_float(uint8_t *pd, lcec_generic_pin_t *hal_data);
 void lcec_generic_write_s32(uint8_t *pd, lcec_generic_pin_t *hal_data, hal_s32_t sval);
 void lcec_generic_write_u32(uint8_t *pd, lcec_generic_pin_t *hal_data, hal_u32_t uval);
+void lcec_generic_write_float(uint8_t *pd, lcec_generic_pin_t *hal_data, hal_float_t fval);
 
 int lcec_generic_init(int comp_id, struct lcec_slave *slave, ec_pdo_entry_reg_t *pdo_entry_regs) {
   lcec_master_t *master = slave->master;
@@ -129,12 +131,7 @@ void lcec_generic_read(struct lcec_slave *slave, long period) {
         break;
 
       case HAL_FLOAT:
-        if (hal_data->subType == lcecPdoEntTypeFloatUnsigned) {
-          fval = lcec_generic_read_u32(pd, hal_data);
-        } else {
-          fval = lcec_generic_read_s32(pd, hal_data);
-        }
-
+        fval = lcec_generic_read_float(pd, hal_data);
         fval *= hal_data->floatScale;
         fval += hal_data->floatOffset;
         *((hal_float_t *) hal_data->pin[0]) = fval;
@@ -242,6 +239,21 @@ hal_u32_t lcec_generic_read_u32(uint8_t *pd, lcec_generic_pin_t *hal_data) {
   return uval;
 }
 
+double lcec_generic_read_float(uint8_t *pd, lcec_generic_pin_t *hal_data) {
+    if (hal_data->subType==lcecPdoEntTypeFloat32) {
+      uint32_t temp = EC_READ_U32(&pd[hal_data->pdo_os]);
+      float ret;
+      memcpy(&ret,&temp,4);
+      return ret;
+    }
+    else {
+       uint64_t temp = EC_READ_U64(&pd[hal_data->pdo_os]);
+       double ret;
+       memcpy(&ret,&temp,8);
+       return ret;
+    }
+}
+
 void lcec_generic_write_s32(uint8_t *pd, lcec_generic_pin_t *hal_data, hal_s32_t sval) {
   int i, offset;
 
@@ -298,3 +310,16 @@ void lcec_generic_write_u32(uint8_t *pd, lcec_generic_pin_t *hal_data, hal_u32_t
   }
 }
 
+void lcec_generic_write_float(uint8_t *pd, lcec_generic_pin_t *hal_data, hal_float_t fval) {
+  if (hal_data->pdo_bp == 0 && hal_data->bitOffset == 0) {
+      if (hal_data->subType==lcecPdoEntTypeFloat32) {
+         float temp = fval;
+         EC_WRITE_U32(&pd[hal_data->pdo_os], *(uint32_t*) &temp);
+         return;
+      }
+      else {
+         EC_WRITE_U64(&pd[hal_data->pdo_os], *(uint64_t*) &fval);
+         return;
+      }
+  }
+}

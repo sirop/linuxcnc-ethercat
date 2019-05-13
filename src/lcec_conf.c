@@ -1101,12 +1101,17 @@ static void parsePdoEntryAttrs(LCEC_CONF_XML_INST_T *inst, int next, const char 
         continue;
       }
       if (strcasecmp(val, "float") == 0) {
-        p->subType = lcecPdoEntTypeFloatSigned;
-        p->halType = HAL_FLOAT;
-        continue;
-      }
-      if (strcasecmp(val, "float-unsigned") == 0) {
-        p->subType = lcecPdoEntTypeFloatUnsigned;
+        if (p->bitLength==32)
+            p->subType = lcecPdoEntTypeFloat32;
+        else {
+              if (p->bitLength==64)
+                 p->subType = lcecPdoEntTypeFloat64;
+              else {
+                    fprintf(stderr, "%s: ERROR: float's bitLen attribute in pdoEntry %s should be either 32 or 64\n", modname, val);
+                    XML_StopParser(inst->parser, 0);
+                    return; 
+              }
+        }
         p->halType = HAL_FLOAT;
         continue;
       }

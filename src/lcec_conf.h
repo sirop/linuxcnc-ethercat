@@ -53,8 +53,8 @@ typedef enum {
 
 typedef enum {
   lcecPdoEntTypeSimple,
-  lcecPdoEntTypeFloatSigned,
-  lcecPdoEntTypeFloatUnsigned,
+  lcecPdoEntTypeFloat32,
+  lcecPdoEntTypeFloat64,
   lcecPdoEntTypeComplex
 } LCEC_PDOENT_TYPE_T;
 
